@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
+const inter = Inter({ subsets: ["latin"] });
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -26,11 +23,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="pl">
+      <body className={inter.className}>
+        <header className="flex items-center justify-between px-8 py-4 border-b border-gray-200 bg-white">
+          <Link href="/" className="text-4xl font-bold text-[#FF7A00]">
+            Handy
+          </Link>
+          <nav className="flex gap-6 text-gray-600">
+            <Link href="/przegladaj" className="hover:text-[#FF7A00] transition py-4">
+              Przeglądaj
+            </Link>
+            <Link href="/addRequest" className="hover:text-[#FF7A00] transition py-4">
+              Dodaj ogłoszenie
+            </Link>
+            <Link
+              href="/login"
+              className="bg-[#FF7A00] text-white px-4 py-4 rounded hover:bg-[#E86A00] transition"
+            >
+              Zaloguj się
+            </Link>
+          </nav>
+        </header>
+
+        <main>{children}</main>
       </body>
     </html>
   );

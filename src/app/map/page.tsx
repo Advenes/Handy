@@ -2,9 +2,11 @@ import MapComponent from "../../../components/MapComponent";
 
 export default function MapPage() {
   return (
-    <main>
-      <h1>Mapa Google na stronie /map</h1>
-      <MapComponent />
-    </main>
+    <div className="p-4">
+      <div className="w-full h-[80vh] rounded-lg overflow-hidden shadow-md border border-gray-200">
+      <MapComponent/>
+
+      </div>
+    </div>
   );
 }

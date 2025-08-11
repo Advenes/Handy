@@ -1,39 +1,50 @@
-"use client"; // ponieważ używamy efektów i window object, musimy wymusić rendering po stronie klienta
+"use client"
 
-import { useEffect, useRef } from "react";
+import React from 'react'
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
 
-export default function MapComponent() {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
-
-  useEffect(() => {
-    if (!window.google) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
-      script.async = true;
-      script.defer = true;
-      script.onload = initMap;
-      document.head.appendChild(script);
-    } else {
-      initMap();
-    }
-
-    function initMap() {
-      if (mapRef.current && !googleMapRef.current) {
-        googleMapRef.current = new window.google.maps.Map(mapRef.current, {
-          center: { lat: 50.0647, lng: 19.9450 }, // np. Kraków
-          zoom: 12,
-        });
-
-        new window.google.maps.Marker({
-          position: { lat: 50.0647, lng: 19.9450 },
-          map: googleMapRef.current,
-          title: "Moja ikona",
-          icon: "/my-icon.png",
-        });
-      }
-    }
-  }, []);
-
-  return <div ref={mapRef} style={{ width: "100%", height: "500px" }} />;
+const containerStyle = {
+  width: '100%',
+  height: '500px',
 }
+
+const center = {
+  lat: 50.0647,
+  lng: 19.9450,
+}
+
+function MapComponent() {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+  })
+
+  const [map, setMap] = React.useState<google.maps.Map | null>(null)
+
+  const onLoad = React.useCallback((mapInstance: google.maps.Map) => {
+    const bounds = new window.google.maps.LatLngBounds(center)
+    mapInstance.fitBounds(bounds)
+    setMap(mapInstance)
+  }, [])
+
+  const onUnmount = React.useCallback(() => {
+    setMap(null)
+  }, [])
+
+  return isLoaded ? (
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={12}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+    >
+      {/* Tu możesz dodać Markery, InfoWindow itd. */}
+      <></>
+    </GoogleMap>
+  ) : (
+    <div>Ładowanie mapy...</div>
+  )
+}
+
+export default React.memo(MapComponent)
