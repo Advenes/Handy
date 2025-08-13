@@ -21,8 +21,8 @@ const LoginPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Błąd logowania");
       setMessage("Zalogowano pomyślnie");
-    } catch (err: any) {
-      setMessage(err.message);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Błąd logowania");
     } finally {
       setLoading(false);
     }

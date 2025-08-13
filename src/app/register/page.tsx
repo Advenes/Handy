@@ -20,7 +20,15 @@ const RegisterPage = () => {
     setLoading(true);
     setMessage(null);
     try {
-      const payload: any = { emailOrPhone, password, role };
+      const payload: {
+        emailOrPhone: string;
+        password: string;
+        role: Role;
+        nip?: string;
+        companyName?: string;
+        address?: string;
+        businessStartDate?: string;
+      } = { emailOrPhone, password, role };
       if (role === "provider") {
         payload.nip = nip;
         payload.companyName = companyName;
@@ -36,8 +44,8 @@ const RegisterPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Błąd rejestracji");
       setMessage("Konto utworzone. Możesz się zalogować.");
-    } catch (err: any) {
-      setMessage(err.message);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Błąd rejestracji");
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, FormEvent } from "react";
 import { Inter } from "next/font/google";
  
 
@@ -24,13 +24,13 @@ export default function AddAnnouncementPage() {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
-  const [files, setFiles] = useState<FileList | null>(null);
+  // Nota bene: upload plików wyłączony w tej iteracji
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFiles(e.target.files);
-  };
+  // const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   setFiles(e.target.files);
+  // };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -75,7 +75,7 @@ export default function AddAnnouncementPage() {
         setCity("");
         setPostalCode("");
         setCountry("");
-        setFiles(null);
+        // setFiles(null);
       } else {
         setMsg(`Błąd: ${data.message || "Coś poszło nie tak"}`);
       }
@@ -217,16 +217,7 @@ export default function AddAnnouncementPage() {
         </div>
 
         {/* Załączniki */}
-        <label className="flex flex-col text-gray-700 font-medium text-sm">
-          Zdjęcia / pliki do załączenia
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleFileChange}
-            className="mt-2"
-          />
-        </label>
+        {/* Upload plików wyłączony */}
 
         {/* Komunikat */}
         {msg && (

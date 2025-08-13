@@ -17,7 +17,7 @@ async function geocodeAddress(fullAddress: string): Promise<{ lat: number; lng: 
     const location = result.geometry?.location;
     if (!location) return null;
     return { lat: location.lat, lng: location.lng };
-  } catch (_) {
+  } catch {
     return null;
   }
 }
