@@ -4,8 +4,7 @@ export default function MapPage() {
   return (
     <div className="p-4">
       <div className="w-full h-[80vh] rounded-lg overflow-hidden shadow-md border border-gray-200">
-      <MapComponent/>
-
+      <MapComponent coords={{lat : 52.2297, lng : 21.0122}}/>
       </div>
     </div>
   );

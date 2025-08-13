@@ -11,7 +11,7 @@ if (!process.env.MONGODB_URI) {
 }
 
 if (process.env.NODE_ENV === "development") {
-  // @ts-ignore
+  // @ts-ignorer
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
     // @ts-ignore

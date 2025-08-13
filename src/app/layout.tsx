@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import GoogleMapsProvider from "./components/GoogleMapsProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
   },
 };
+
+// layout remains a Server Component; GoogleMapsProvider is a Client Component
 
 export default function RootLayout({
   children,
@@ -44,8 +47,9 @@ export default function RootLayout({
             </Link>
           </nav>
         </header>
-
-        <main>{children}</main>
+        <GoogleMapsProvider>
+          <main>{children}</main>
+        </GoogleMapsProvider>
       </body>
     </html>
   );

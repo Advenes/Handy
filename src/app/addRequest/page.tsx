@@ -2,17 +2,11 @@
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Inter } from "next/font/google";
+ 
 
 const inter = Inter({ subsets: ["latin"] });
 
-const categories = [
-  "Sprzątanie",
-  "Naprawa",
-  "Budowa",
-  "Ogrodnictwo",
-  "Inne",
-];
-
+const categories = ["Sprzątanie", "Naprawa", "Budowa", "Ogrodnictwo", "Inne"];
 const urgencyLevels = [
   { label: "Niska", value: "low" },
   { label: "Średnia", value: "medium" },
@@ -20,12 +14,16 @@ const urgencyLevels = [
 ];
 
 export default function AddAnnouncementPage() {
+  
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [urgency, setUrgency] = useState("medium");
   const [money, setMoney] = useState<number | "">("");
-  const [location, setLocation] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +35,6 @@ export default function AddAnnouncementPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Prosta walidacja - np. wymagane pola
     if (!category || !title || !description) {
       setMsg("Proszę wypełnić wszystkie wymagane pola.");
       return;
@@ -47,22 +44,21 @@ export default function AddAnnouncementPage() {
     setMsg(null);
 
     try {
-      // Zbuduj obiekt do wysłania
       const payload = {
         category,
         title,
         description,
         urgency,
         money: money === "" ? null : money,
-        location,
-        // UWAGA: Pliki tutaj NIE są wysyłane - to wymaga innej obsługi (multipart/form-data)
+        addressLine1,
+        city,
+        postalCode,
+        country,
       };
 
       const res = await fetch("/api/addAnnouncement", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -70,18 +66,21 @@ export default function AddAnnouncementPage() {
 
       if (res.ok) {
         setMsg(`Sukces! ID ogłoszenia: ${data.id}`);
-        // Opcjonalnie wyczyść formularz
         setCategory("");
         setTitle("");
         setDescription("");
         setUrgency("medium");
         setMoney("");
-        setLocation("");
+        setAddressLine1("");
+        setCity("");
+        setPostalCode("");
+        setCountry("");
         setFiles(null);
       } else {
         setMsg(`Błąd: ${data.message || "Coś poszło nie tak"}`);
       }
     } catch (error) {
+      console.error(error);
       setMsg("Błąd połączenia z serwerem.");
     } finally {
       setLoading(false);
@@ -89,13 +88,10 @@ export default function AddAnnouncementPage() {
   };
 
   return (
-    <main
-      className={`${inter.className} max-w-xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-12`}
-    >
-      <h1 className="text-3xl font-semibold text-gray-900 mb-8 text-center">
-        Dodaj ogłoszenie
-      </h1>
+    <main className={`${inter.className} max-w-xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-12`}>
+      <h1 className="text-3xl font-semibold text-gray-900 mb-8 text-center">Dodaj ogłoszenie</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        
         {/* Kategoria */}
         <label className="flex flex-col text-gray-700 font-medium text-sm">
           Kategoria pomocy
@@ -105,13 +101,9 @@ export default function AddAnnouncementPage() {
             required
             className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
-            <option value="" disabled>
-              Wybierz kategorię
-            </option>
+            <option value="" disabled>Wybierz kategorię</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </label>
@@ -152,9 +144,7 @@ export default function AddAnnouncementPage() {
             className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             {urgencyLevels.map(({ label, value }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
         </label>
@@ -175,17 +165,56 @@ export default function AddAnnouncementPage() {
           />
         </label>
 
-        {/* Lokalizacja */}
-        <label className="flex flex-col text-gray-700 font-medium text-sm">
-          Lokalizacja (adres)
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Podaj adres"
-            className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </label>
+        {/* Adres */}
+        <div className="grid grid-cols-1 gap-4">
+          <label className="flex flex-col text-gray-700 font-medium text-sm">
+            Ulica i numer
+            <input
+              type="text"
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
+              required
+              placeholder="np. Jana Pawła II 10/2"
+              className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <label className="flex flex-col text-gray-700 font-medium text-sm md:col-span-2">
+              Miasto
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+                placeholder="np. Warszawa"
+                className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </label>
+            <label className="flex flex-col text-gray-700 font-medium text-sm">
+              Kod pocztowy
+              <input
+                type="text"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                required
+                placeholder="np. 00-001"
+                pattern="^[0-9]{2}-[0-9]{3}$"
+                className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </label>
+          </div>
+          <label className="flex flex-col text-gray-700 font-medium text-sm">
+            Kraj
+            <input
+              type="text"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+              placeholder="np. Polska"
+              className="mt-2 p-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </label>
+        </div>
 
         {/* Załączniki */}
         <label className="flex flex-col text-gray-700 font-medium text-sm">
@@ -202,9 +231,7 @@ export default function AddAnnouncementPage() {
         {/* Komunikat */}
         {msg && (
           <p
-            className={`mt-2 text-center ${
-              msg.startsWith("Sukces") ? "text-green-600" : "text-red-600"
-            }`}
+            className={`mt-2 text-center ${msg.startsWith("Sukces") ? "text-green-600" : "text-red-600"}`}
           >
             {msg}
           </p>

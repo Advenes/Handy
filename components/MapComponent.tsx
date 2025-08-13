@@ -1,50 +1,18 @@
-"use client"
+"use client";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 
-import React from 'react'
-import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
-
-const containerStyle = {
-  width: '100%',
-  height: '500px',
+interface MapComponentProps {
+  coords: { lat: number; lng: number };
 }
 
-const center = {
-  lat: 50.0647,
-  lng: 19.9450,
-}
-
-function MapComponent() {
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-  })
-
-  const [map, setMap] = React.useState<google.maps.Map | null>(null)
-
-  const onLoad = React.useCallback((mapInstance: google.maps.Map) => {
-    const bounds = new window.google.maps.LatLngBounds(center)
-    mapInstance.fitBounds(bounds)
-    setMap(mapInstance)
-  }, [])
-
-  const onUnmount = React.useCallback(() => {
-    setMap(null)
-  }, [])
-
-  return isLoaded ? (
+export default function MapComponent({ coords }: MapComponentProps) {
+  return (
     <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={center}
-      zoom={12}
-      onLoad={onLoad}
-      onUnmount={onUnmount}
+      mapContainerStyle={{ width: "100%", height: "500px" }}
+      center={coords}
+      zoom={15}
     >
-      {/* Tu możesz dodać Markery, InfoWindow itd. */}
-      <></>
+      <Marker position={coords} />
     </GoogleMap>
-  ) : (
-    <div>Ładowanie mapy...</div>
-  )
+  );
 }
-
-export default React.memo(MapComponent)
