@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Inter } from "next/font/google";
 import { GoogleMap, Marker } from "@react-google-maps/api";
+import Header from "../components/Header";
 
 type Item = {
   _id: string;
@@ -76,72 +77,72 @@ export default function SearchPage() {
   }, []);
 
   return (
-    <main className={`${inter.className}`}> 
-      <h1 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 animate-fade-in">Wyszukaj ogłoszenia</h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-white border rounded-xl p-4 md:p-6 shadow-sm animate-slide-up">
-        <div className="space-y-2">
-          <label className="block text-sm">Kategoria</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border rounded px-2 py-2">
-            <option value="">Wszystkie</option>
-            <option value="Sprzątanie">Sprzątanie</option>
-            <option value="Naprawa">Naprawa</option>
-            <option value="Budowa">Budowa</option>
-            <option value="Ogrodnictwo">Ogrodnictwo</option>
-            <option value="Inne">Inne</option>
-          </select>
+    <main className={`${inter.className} max-w-6xl mx-auto px-6 py-6`}> 
+        <h1 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 animate-fade-in">Wyszukaj ogłoszenia</h1>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-white border rounded-xl p-4 md:p-6 shadow-sm animate-slide-up">
+          <div className="space-y-2">
+            <label className="block text-sm">Kategoria</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border rounded px-2 py-2">
+              <option value="">Wszystkie</option>
+              <option value="Sprzątanie">Sprzątanie</option>
+              <option value="Naprawa">Naprawa</option>
+              <option value="Budowa">Budowa</option>
+              <option value="Ogrodnictwo">Ogrodnictwo</option>
+              <option value="Inne">Inne</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm">Pilność</label>
+            <select value={urgency} onChange={(e) => setUrgency(e.target.value)} className="w-full border rounded px-2 py-2">
+              <option value="">Wszystkie</option>
+              <option value="low">Niska</option>
+              <option value="medium">Średnia</option>
+              <option value="high">Wysoka</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm">Kwota od</label>
+            <input type="number" value={minMoney} onChange={(e) => setMinMoney(e.target.value)} className="w-full border rounded px-2 py-2" />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm">Kwota do</label>
+            <input type="number" value={maxMoney} onChange={(e) => setMaxMoney(e.target.value)} className="w-full border rounded px-2 py-2" />
+          </div>
+          <div className="md:col-span-4 flex gap-2">
+            <button onClick={() => fetchItems()} className="bg-[#FF7A00] text-white px-5 py-2.5 rounded-lg hover:bg-[#E86A00] transition">Szukaj</button>
+            <button onClick={() => { setCategory(""); setUrgency(""); setMinMoney(""); setMaxMoney(""); fetchItems(); }} className="border px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">Wyczyść</button>
+          </div>
         </div>
-        <div className="space-y-2">
-          <label className="block text-sm">Pilność</label>
-          <select value={urgency} onChange={(e) => setUrgency(e.target.value)} className="w-full border rounded px-2 py-2">
-            <option value="">Wszystkie</option>
-            <option value="low">Niska</option>
-            <option value="medium">Średnia</option>
-            <option value="high">Wysoka</option>
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm">Kwota od</label>
-          <input type="number" value={minMoney} onChange={(e) => setMinMoney(e.target.value)} className="w-full border rounded px-2 py-2" />
-        </div>
-        <div className="space-y-2">
-          <label className="block text-sm">Kwota do</label>
-          <input type="number" value={maxMoney} onChange={(e) => setMaxMoney(e.target.value)} className="w-full border rounded px-2 py-2" />
-        </div>
-        <div className="md:col-span-4 flex gap-2">
-          <button onClick={() => fetchItems()} className="bg-[#FF7A00] text-white px-5 py-2.5 rounded-lg hover:bg-[#E86A00] transition">Szukaj</button>
-          <button onClick={() => { setCategory(""); setUrgency(""); setMinMoney(""); setMaxMoney(""); fetchItems(); }} className="border px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">Wyczyść</button>
-        </div>
-      </div>
 
-      <div className="w-full h-[75vh] rounded-2xl overflow-hidden border shadow-sm bg-white animate-slide-up" style={{ animationDelay: "90ms" }}>
-        <GoogleMap
-          onLoad={(map) => {
-            setMapInstance(map);
-            // opcjonalnie dopasuj mapę do wyników
-            if (items.length) {
-              const bounds = new google.maps.LatLngBounds();
-              items.forEach((it) => bounds.extend({ lat: it.latitude, lng: it.longitude }));
-              map.fitBounds(bounds);
-            }
-          }}
-          onDragEnd={() => {
-            const b = mapInstance?.getBounds();
-            if (b) fetchItems(b);
-          }}
-          mapContainerStyle={{ width: "100%", height: "100%" }}
-          center={center}
-          zoom={zoom}
-        >
-          {items.map((it) => (
-            <Marker
-              key={it._id}
-              position={{ lat: it.latitude, lng: it.longitude }}
-              title={it.title}
-            />
-          ))}
-        </GoogleMap>
-      </div>
-    </main>
+        <div className="w-full h-[75vh] rounded-2xl overflow-hidden border shadow-sm bg-white animate-slide-up" style={{ animationDelay: "90ms" }}>
+          <GoogleMap
+            onLoad={(map) => {
+              setMapInstance(map);
+              // opcjonalnie dopasuj mapę do wyników
+              if (items.length) {
+                const bounds = new google.maps.LatLngBounds();
+                items.forEach((it) => bounds.extend({ lat: it.latitude, lng: it.longitude }));
+                map.fitBounds(bounds);
+              }
+            }}
+            onDragEnd={() => {
+              const b = mapInstance?.getBounds();
+              if (b) fetchItems(b);
+            }}
+            mapContainerStyle={{ width: "100%", height: "100%" }}
+            center={center}
+            zoom={zoom}
+          >
+            {items.map((it) => (
+              <Marker
+                key={it._id}
+                position={{ lat: it.latitude, lng: it.longitude }}
+                title={it.title}
+              />
+            ))}
+          </GoogleMap>
+                 </div>
+       </main>
   );
 }
 

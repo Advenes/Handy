@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,23 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const router = useRouter();
+
+  // Sprawdź czy użytkownik jest już zalogowany
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    const userData = localStorage.getItem("userData");
+    
+    if (token && userData) {
+      const user = JSON.parse(userData);
+      // Przekieruj na odpowiedni panel
+      if (user.role === "client") {
+        router.push("/client-dashboard");
+      } else {
+        router.push("/provider-dashboard");
+      }
+    }
+  }, [router]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,8 +80,24 @@ const LoginPage = () => {
         body: JSON.stringify(loginData),
       });
       const data = await res.json();
+      
       if (!res.ok) throw new Error(data.message || "Błąd logowania");
+      
+      // Zapisz dane użytkownika w localStorage
+      localStorage.setItem("authToken", data.token || "dummy-token");
+      localStorage.setItem("userData", JSON.stringify(data.user));
+      
       setMessage("Zalogowano pomyślnie");
+      
+      // Przekieruj na odpowiedni panel po krótkim opóźnieniu
+      setTimeout(() => {
+        if (data.user.role === "client") {
+          router.push("/client-dashboard");
+        } else {
+          router.push("/provider-dashboard");
+        }
+      }, 1000);
+      
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Błąd logowania");
     } finally {
@@ -144,7 +178,11 @@ const LoginPage = () => {
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
 
-          {message && <p className="text-center text-sm text-red-600">{message}</p>}
+          {message && (
+            <p className={`text-center text-sm ${message.includes("pomyślnie") ? "text-green-600" : "text-red-600"}`}>
+              {message}
+            </p>
+          )}
 
           <button
             type="submit"

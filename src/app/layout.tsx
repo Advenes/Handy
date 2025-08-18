@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 import GoogleMapsProvider from "./components/GoogleMapsProvider";
+import Header from "./components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -18,8 +18,6 @@ export const metadata: Metadata = {
   },
 };
 
-// layout remains a Server Component; GoogleMapsProvider is a Client Component
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,32 +26,9 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className={inter.className}>
-        <header className="border-b border-gray-200 bg-white">
-          <div className="max-w-6xl mx-auto px-4 md:px-6 flex items-center justify-between py-4 animate-fade-in">
-            <Link href="/" className="text-4xl font-bold text-[#FF7A00] transition-base hover:opacity-90">
-              Handy
-            </Link>
-            <nav className="flex gap-6 text-gray-600">
-              <Link href="/przegladaj" className="hover:text-[#FF7A00] transition py-2">
-                Przeglądaj
-              </Link>
-              <Link href="/addRequest" className="hover:text-[#FF7A00] transition py-2">
-                Dodaj ogłoszenie
-              </Link>
-              <Link href="/wyszukaj" className="hover:text-[#FF7A00] transition py-2">
-                Wyszukaj
-              </Link>
-              <Link
-                href="/login"
-                className="bg-[#FF7A00] text-white px-4 py-2 rounded-lg hover:bg-[#E86A00] transition hover-lift"
-              >
-                Zaloguj się
-              </Link>
-            </nav>
-          </div>
-        </header>
+        <Header />
         <GoogleMapsProvider>
-          <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 animate-slide-up">{children}</main>
+          <main className="animate-slide-up">{children}</main>
         </GoogleMapsProvider>
       </body>
     </html>

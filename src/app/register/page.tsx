@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type Role = "client" | "provider";
 type Voivodeship = "dolnoslaskie" | "kujawsko-pomorskie" | "lubelskie" | "lubuskie" | "lodzkie" | "malopolskie" | "mazowieckie" | "opolskie" | "podkarpackie" | "podlaskie" | "pomorskie" | "slaskie" | "swietokrzyskie" | "warminsko-mazurskie" | "wielkopolskie" | "zachodniopomorskie";
 
 const RegisterPage = () => {
   const [role, setRole] = useState<Role>("client");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +20,23 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const router = useRouter();
+
+  // Sprawdź czy użytkownik jest już zalogowany
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    const userData = localStorage.getItem("userData");
+    
+    if (token && userData) {
+      const user = JSON.parse(userData);
+      // Przekieruj na odpowiedni panel
+      if (user.role === "client") {
+        router.push("/client-dashboard");
+      } else {
+        router.push("/provider-dashboard");
+      }
+    }
+  }, [router]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,6 +50,10 @@ const RegisterPage = () => {
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
+
+    if (!username || username.length < 2) {
+      newErrors.username = "Nazwa użytkownika musi mieć co najmniej 2 znaki";
+    }
 
     if (!email || !validateEmail(email)) {
       newErrors.email = "Wprowadź poprawny adres email";
@@ -71,6 +94,7 @@ const RegisterPage = () => {
     setMessage(null);
     try {
       const payload: {
+        username: string;
         email: string;
         phone: string;
         password: string;
@@ -80,7 +104,7 @@ const RegisterPage = () => {
         companyName?: string;
         address?: string;
         businessStartDate?: string;
-      } = { email, phone, password, role, voivodeship };
+      } = { username, email, phone, password, role, voivodeship };
       
       if (role === "provider") {
         payload.nip = nip;
@@ -95,8 +119,34 @@ const RegisterPage = () => {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
+      
       if (!res.ok) throw new Error(data.message || "Błąd rejestracji");
-      setMessage("Konto utworzone. Możesz się zalogować.");
+      
+      // Zapisz dane użytkownika w localStorage
+      const userData = {
+        username,
+        email,
+        phone,
+        role,
+        voivodeship,
+        id: data.id,
+        ...(role === "provider" && { nip, companyName, address, businessStartDate })
+      };
+      
+      localStorage.setItem("authToken", "dummy-token");
+      localStorage.setItem("userData", JSON.stringify(userData));
+      
+      setMessage("Konto utworzone. Przekierowywanie na panel...");
+      
+      // Przekieruj na odpowiedni panel po krótkim opóźnieniu
+      setTimeout(() => {
+        if (role === "client") {
+          router.push("/client-dashboard");
+        } else {
+          router.push("/provider-dashboard");
+        }
+      }, 2000);
+      
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Błąd rejestracji");
     } finally {
@@ -151,6 +201,21 @@ const RegisterPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Nazwa użytkownika *</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="np. Jan Kowalski"
+              className={`w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.username ? "border-red-500" : "border-gray-300"
+              }`}
+              required
+            />
+            {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">Email *</label>
             <input
@@ -265,7 +330,11 @@ const RegisterPage = () => {
             </div>
           )}
 
-          {message && <p className="text-center text-sm text-red-600">{message}</p>}
+          {message && (
+            <p className={`text-center text-sm ${message.includes("utworzone") ? "text-green-600" : "text-red-600"}`}>
+              {message}
+            </p>
+          )}
 
           <button
             type="submit"

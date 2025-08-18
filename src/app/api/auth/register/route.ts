@@ -4,11 +4,16 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
-    const { email, phone, password, role, voivodeship, ...rest } = await request.json();
+    const { username, email, phone, password, role, voivodeship, ...rest } = await request.json();
     
     // Walidacja wymaganych pól
-    if (!email || !phone || !password || !voivodeship) {
+    if (!username || !email || !phone || !password || !voivodeship) {
       return NextResponse.json({ message: "Brak wymaganych pól" }, { status: 400 });
+    }
+
+    // Walidacja nazwy użytkownika
+    if (username.length < 2) {
+      return NextResponse.json({ message: "Nazwa użytkownika musi mieć co najmniej 2 znaki" }, { status: 400 });
     }
 
     // Walidacja emaila
@@ -43,7 +48,12 @@ export async function POST(request: Request) {
     const db = client.db("users");
     const users = db.collection("users");
 
-    // Sprawdzenie czy użytkownik już istnieje (email lub telefon)
+    // Sprawdzenie czy użytkownik już istnieje (username, email lub telefon)
+    const existingByUsername = await users.findOne({ username });
+    if (existingByUsername) {
+      return NextResponse.json({ message: "Użytkownik z tą nazwą już istnieje" }, { status: 409 });
+    }
+
     const existingByEmail = await users.findOne({ email });
     if (existingByEmail) {
       return NextResponse.json({ message: "Użytkownik z tym adresem email już istnieje" }, { status: 409 });
@@ -57,6 +67,7 @@ export async function POST(request: Request) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const doc = {
+      username,
       email,
       phone,
       passwordHash,

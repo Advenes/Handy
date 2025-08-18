@@ -2,6 +2,8 @@
 
 import React, { useState, FormEvent } from "react";
 import { Inter } from "next/font/google";
+import { useRouter } from "next/navigation";
+import Header from "../components/Header";
  
 
 const inter = Inter({ subsets: ["latin"] });
@@ -88,7 +90,7 @@ export default function AddAnnouncementPage() {
   };
 
   return (
-    <main className={`${inter.className} max-w-xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-12`}>
+    <main className={`${inter.className} max-w-6xl mx-auto py-6 px-8 bg-white shadow-lg rounded-lg mt-12`}>
       <h1 className="text-3xl font-semibold text-gray-900 mb-8 text-center">Dodaj ogłoszenie</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         
@@ -236,7 +238,7 @@ export default function AddAnnouncementPage() {
         >
           {loading ? "Wysyłam..." : "Dodaj ogłoszenie"}
         </button>
-      </form>
-    </main>
+              </form>
+      </main>
   );
 }
