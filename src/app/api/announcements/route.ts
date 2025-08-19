@@ -3,6 +3,7 @@ import clientPromise from "../../lib/mongodb";
 
 type AnnouncementDoc = {
   _id: unknown;
+  numericId?: number;
   title?: string;
   category?: string;
   urgency?: string;
@@ -11,6 +12,7 @@ type AnnouncementDoc = {
   longitude?: number;
   location?: string;
 };
+
 type AnnouncementWithCoords = Omit<AnnouncementDoc, "latitude" | "longitude"> & {
   latitude: number;
   longitude: number;
@@ -60,6 +62,7 @@ export async function GET(request: Request) {
     }
 
     const projection = {
+      numericId: 1,
       title: 1,
       category: 1,
       urgency: 1,
